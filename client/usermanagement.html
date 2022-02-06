@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="usermanagement.css">
+    <script defer src="/usermanagement.js"></script>
+</head>
+<body>
+    <div id="login" class="page">
+        <h1>Login</h1>
+        <label for="l_username">Username or email</label>
+        <input id="l_username" type="text"/>
+        <label for="l_password">Password</label>
+        <input id="l_password" type="text"/>
+        <button onclick="login()">Login</button>
+        <br/>
+        <button onclick="openRegister()">Register</button>
+    </div>
+    <div id="register" class="page">
+        <h1>Register</h1>
+        <label for="username">Username</label>
+        <input id="username" type="text"/>
+        <label for="password">Password</label>
+        <input id="password" type="text"/>
+        <label for="email">Email</label>
+        <input id="email" type="text"/>
+        <button onclick="register()">Register</button>
+        <br/>
+        <button onclick="openLogin()">Login</button>
+    </div>
+    <div class="msg">
+        <p></p>
+    </div>
+</body>
+</html>

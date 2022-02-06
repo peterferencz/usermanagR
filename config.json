@@ -1,0 +1,18 @@
+{
+    "account":{
+        "username":{
+            "min": 4,
+            "max": 12
+        },
+        "password":{
+            "min": 8,
+            "max": 25,
+            "saltLength": 16
+        },
+        "cookie":{
+            "name": "session",
+            "lengtgh": 8,
+            "secret": "<Your-secret>"
+        }
+    }
+}
