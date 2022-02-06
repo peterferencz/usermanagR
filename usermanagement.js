@@ -146,6 +146,16 @@ exports.getLoggedInUserFromId = (id) =>{
     return null;
 }
 
+exports.logout = (cookie) => {
+    for(let i = 0; i < loggedInUsers.length; i++){
+        if(loggedInUsers[i].cookie == cookie){
+            loggedInUsers.splice(i, 1)
+            return true;
+        }
+    }
+    return false;
+}
+
 function hash(str, salt){
     return crypto.pbkdf2Sync(str, salt, 1000, 64, `sha512`).toString(`hex`)
 }

@@ -20,8 +20,8 @@ const staticcontent = [
     ["/usermanagement","usermanagement.html"],
     ["/usermanagement.js","usermanagement.js"],
     ["/usermanagement.css","usermanagement.css"],
-    ["",""],
-    ["",""],
+    ["/dashboard.css","dashboard.css"],
+    ["/dashboard.js","dashboard.js"]
 ]
 
 app.get('/dashboard', (req,res) => {
@@ -78,6 +78,8 @@ app.post('/register', async (req, res) => {
     //TODO add error handling
     await usermanagement.registerUser(username, password, email)
 
+    const cookie = await usermanagement.loginwithusername(username, password)
+    res.cookie(config.account.cookie.name, cookie, {signed: true})
     res.write('0')
     res.end()
 })
@@ -135,6 +137,12 @@ app.post('/login', async (req,res) => {
     res.write('0')
     res.end()
     return;
+})
+
+app.get('/logout', (req, res) => {
+    const cookie = req.signedCookies[config.account.cookie.name]
+    usermanagement.logout(cookie)
+    res.redirect('/')
 })
 
 //Handling of static content

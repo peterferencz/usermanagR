@@ -25,7 +25,6 @@ function register(){
         credentials: 'same-origin', // include, *same-origin, omit
         headers: {
           'Content-Type': 'application/json'
-          // 'Content-Type': 'application/x-www-form-urlencoded',
         },
         redirect: 'follow', // manual, *follow, error
         referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
@@ -40,7 +39,7 @@ function register(){
         switch(result){
             case 0:
                 //Everything is fine
-                
+                window.location.replace("/dashboard")
                 break;
             case 1:
                 //Username already exists
