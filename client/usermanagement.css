@@ -24,6 +24,7 @@
 }
 .msg > p {
     background-color: #f54f8c;
+    display: none;
     margin: 1rem;
     padding: 0.25rem;
     border-radius: 0.25rem;

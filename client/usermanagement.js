@@ -34,40 +34,12 @@ function register(){
             email: Eemail.value
         })
     }).then(async(result) => {
-        result = await result.json()
-        console.log(result)
-        switch(result){
-            case 0:
-                //Everything is fine
-                window.location.replace("/dashboard")
-                break;
-            case 1:
-                //Username already exists
-                displayMessage('Username taken')
-                break;
-            case 2:
-                //Email already exists
-                displayMessage('Email already in use')
-                break;
-            case 3:
-                //Invalid username
-                displayMessage('Invalid username. (4 - 12 characters)')
-                break;
-            case 4:
-                //Invalid password
-                displayMessage('Invalid password. (8 - 25 characters)')
-                break;
-            case 5:
-                //Invalid email
-                displayMessage('Invalid email')
-                break;
-            case 6:
-                //Invalid request (missing body)
-                displayMessage('Request data lost during transmission, try again')
-                break;
-            default:
-                displayMessage('Unexpected error')
-                break;
+        result = await result.text()
+        
+        if(result.status == 200){
+            window.location.replace("/dashboard")
+        }else{
+            displayMessage(result)
         }
     }).catch((err) => {
         console.log(err)
@@ -75,7 +47,6 @@ function register(){
 }
 
 function login(){
-    console.log('login')
     const Eusername = document.querySelector('#l_username')
     const Epassword = document.querySelector('#l_password')
 
@@ -94,32 +65,12 @@ function login(){
             password: Epassword.value
         })
     }).then(async(result) => {
-        result = await result.json()
-        console.log(result)
-        switch(result){
-            case 0:
-                //Everything is fine
-                window.location.replace("/dashboard")
-                break;
-            case 1:
-                //Username invalid
-                displayMessage('Username invalid')
-                break;
-            case 2:
-                //Email invalid
-                displayMessage('Email invalid')
-                break;
-            case 3:
-                //Password invalid
-                displayMessage('Password invalid')
-                break;
-            case 4:
-                //invalid request
-                displayMessage('Request data lost during transmission, try again')
-                break;
-            default:
-                displayMessage('Unexpected error')
-                break;
+        result = await result.text()
+
+        if(result.status == 200){
+            window.location.replace("/dashboard")
+        }else{
+            displayMessage(result)
         }
     }).catch((err) => {
         console.log(err)

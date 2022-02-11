@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-const crypto = require('crypto')
+const enctypt = require('crypto')
 const config = require('./config.json')
 
 const loggedInUsers = []
@@ -14,20 +14,10 @@ const userSchema = new Schema({
     timestamps: true
 })
 
+
 const usersdb = mongoose.model('user', userSchema)
 
-// exports.getUserFromCredentials = (username, password) => {
-//     usersdb.findOne({
-//         username: username,
-//         password: password
-//     }).then((user) => {
-//         return user
-//     }).catch((err) => {
-//         throw err
-//     })
-// }
-
-exports.register_isusernamevalid = (username) => {
+exports.isusernamevalid = (username) => {
     return (username.length > config.account.username.min-1 && username.length < config.account.username.max+1)
 }
 
@@ -40,8 +30,7 @@ exports.isusernametaken = async (username) => {
         return true
     }
 }
-exports.register_ispasswordvalid = (password) => {
-    console.log(password, password.length, config.account.password.min, config.account.password.max)
+exports.ispasswordvalid = (password) => {
     if((password.length >= config.account.password.min) && (password.length <= config.account.password.max)){
         return true
     } else {
@@ -73,7 +62,7 @@ exports.loginwithemail = async (email, password) => {
         if(hash(password, usr.salt) == usr.passwordHash){
             let cookie = randomHex(config.account.cookie.lengtgh)
             
-            while(this.getLoggedInUserFromCookie(cookie) != null){
+            while(getLoggedInUserFromCookie(cookie) != null){
                 cookie = randomHex(config.account.cookie.lengtgh)
             }
 
@@ -98,7 +87,7 @@ exports.loginwithusername = async (username, password) => {
         if(hash(password, usr.passwordSalt) == usr.passwordHash){
             let cookie = randomHex(config.account.cookie.lengtgh)
             
-            while(this.getLoggedInUserFromCookie(cookie) != null){
+            while(getLoggedInUserFromCookie(cookie) != null){
                 cookie = randomHex(config.account.cookie.lengtgh)
             }
 
@@ -129,7 +118,7 @@ exports.registerUser = async (username, password, email) => {
 }
 
 
-exports.getLoggedInUserFromCookie = (cookie) =>{
+function getLoggedInUserFromCookie(cookie) {
     for(let i = 0; i < loggedInUsers.length; i++){
         if(loggedInUsers[i].cookie == cookie){
             return loggedInUsers[i]
@@ -137,6 +126,7 @@ exports.getLoggedInUserFromCookie = (cookie) =>{
     }
     return null;
 }
+exports.getLoggedInUserFromCookie = getLoggedInUserFromCookie
 exports.getLoggedInUserFromId = (id) =>{
     for(let i = 0; i < loggedInUsers.length; i++){
         if(loggedInUsers[i].id == id){
@@ -157,9 +147,9 @@ exports.logout = (cookie) => {
 }
 
 function hash(str, salt){
-    return crypto.pbkdf2Sync(str, salt, 1000, 64, `sha512`).toString(`hex`)
+    return enctypt.pbkdf2Sync(str, salt, 1000, 64, `sha512`).toString(`hex`)
 }
 
 function randomHex(length){
-    return crypto.randomBytes(length).toString('hex');
+    return enctypt.randomBytes(length).toString('hex');
 }

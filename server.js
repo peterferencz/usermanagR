@@ -1,14 +1,13 @@
 const express = require('express')
-const bodyparser = require('body-parser')
 const cookieparser = require('cookie-parser')
 const path = require('path')
 const mongoose = require('mongoose')
 const usermanagement = require('./usermanagement')
-const config = require("./config.json")
+const config = require('./config.json')
 
 const app = express()
 app.use(cookieparser(config.account.cookie.secret))
-app.use(bodyparser.json())
+app.use(express.json())
 app.set('view-engine', 'ejs')
 app.engine('html', require('ejs').renderFile)
 app.set('views', path.join(__dirname,'client'))
@@ -24,10 +23,11 @@ const staticcontent = [
     ["/dashboard.js","dashboard.js"]
 ]
 
-app.get('/dashboard', (req,res) => {
-    const cookie = req.signedCookies[config.account.cookie.name]
-    const loggedInUser = usermanagement.getLoggedInUserFromCookie(cookie)
-    if(cookie == null || loggedInUser == null){
+
+
+app.get('/dashboard', (req, res) => {
+    const loggedInUser = requierLogin(req)
+    if(!loggedInUser){
         res.redirect('/')
         return;
     }
@@ -38,59 +38,55 @@ app.get('/dashboard', (req,res) => {
 })
 
 app.post('/register', async (req, res) => {
-    if(req.body.username == null || req.body.password == null || req.body.email == null){
-        res.write('6')
-        res.end()
-        return
-    }
     const username = req.body.username
     const password = req.body.password
     const email = req.body.email
 
-    if(!usermanagement.register_isusernamevalid(username)){
-        res.write('3')
+    if(username == null || username.length == 0 || 
+        password == null || password.length == 0 || 
+        email == null || email.length == 0){
+        res.write('Please fill in all the fields')
         res.end()
-        return;
+        return
     }
 
-    if(await usermanagement.isusernametaken(username)){
-        res.write('1')
-        res.end()
-        return;
+    const conditions = [
+        {function: async () => usermanagement.isusernamevalid(username), expected: true,
+            error: `Username not valid (${config.account.username.min} - ${config.account.username.max})`},
+        {function: async () => usermanagement.isusernametaken(username), expected: false,
+            error: "Username already taken"},
+        {function: async () => usermanagement.isemailvalid(email), expected: true,
+            error: "Email not valid"},
+        {function: async () => usermanagement.isemailtaken(email), expected: false,
+            error: "Email already in use"},
+        {function: async () => usermanagement.ispasswordvalid(password), expected: true,
+            error: `Password not valid (${config.account.password.min} - ${config.account.password.max})`},
+    ]
+
+    for (let i = 0; i < conditions.length; i++) {
+        const condition = conditions[i];
+        if(await condition.function() != condition.expected){
+            res.status(400)
+            res.write(condition.error)
+            res.end()
+            return
+        }
     }
 
-    if(!usermanagement.isemailvalid(email)){
-        res.write('5')
-        res.end()
-        return;
-    }
-    if(await usermanagement.isemailtaken(email)){
-        res.write('2')
-        res.end()
-        return;
-    }
-    if(!usermanagement.register_ispasswordvalid(password)){
-        res.write('4')
-        res.end()
-        return;
-    }
-
-    //TODO add error handling
     await usermanagement.registerUser(username, password, email)
 
     const cookie = await usermanagement.loginwithusername(username, password)
     res.cookie(config.account.cookie.name, cookie, {signed: true})
-    res.write('0')
+    res.status(200)
     res.end()
 })
 
 app.post('/login', async (req,res) => {
-    console.log('login')
     const username = req.body.username
     const password = req.body.password
 
-    if(password == null || username == null){
-        console.log('2')
+    if(username == null || username.length == 0 || 
+        password == null || password.length == 0){
         res.write('2')
         res.end()
         return;
@@ -101,32 +97,28 @@ app.post('/login', async (req,res) => {
     if(usermanagement.isemailvalid(username)){
         //Login with email
         if(!(await usermanagement.isemailtaken(username))){
-            console.log('4')
-            res.write('4')
+            res.write('Email is not in use')
             res.end()
             return;
         }
 
         const cookie = await usermanagement.loginwithemail(username, password)
         if(cookie == false){
-            console.log('2')
-            res.write('2')
+            res.write('Invalid credentials')
             res.end()
             return;
         }
         userCookie = cookie
     }else{
         if(!(await usermanagement.isusernametaken(username))){
-            console.log('1')
-            res.write('1')
+            res.write('Unknown username')
             res.end()
             return;
         }
 
         const cookie = await usermanagement.loginwithusername(username, password)
         if(cookie == false){
-            console.log('3')
-            res.write('3')
+            res.write('Invalid credentials')
             res.end()
             return;
         }
@@ -134,7 +126,6 @@ app.post('/login', async (req,res) => {
     }
 
     res.cookie(config.account.cookie.name, userCookie, {signed: true})
-    res.write('0')
     res.end()
     return;
 })
@@ -161,12 +152,22 @@ app.get('*', (req,res) => {
     res.end()
 })
 
+
+function requierLogin(req){
+    const cookie = req.signedCookies[config.account.cookie.name]
+    const loggedInUser = usermanagement.getLoggedInUserFromCookie(cookie)
+    if(cookie == null || loggedInUser == null){
+        return null;
+    }
+    return loggedInUser
+}
+
 app.listen(8080, (err) => {
     if (err) throw err;
     console.log("Express server started")
 })
 
-mongoose.connect('mongodb://localhost:27017/lollers', {
+mongoose.connect(config.database.connectionString, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }, (err) => {

@@ -1,4 +1,7 @@
 {
+    "database":{
+        "connectionString": "mongodb://localhost:27017/lollers"
+    },
     "account":{
         "username":{
             "min": 4,
