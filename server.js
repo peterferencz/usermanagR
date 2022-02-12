@@ -42,15 +42,10 @@ app.post('/register', async (req, res) => {
     const password = req.body.password
     const email = req.body.email
 
-    if(username == null || username.length == 0 || 
-        password == null || password.length == 0 || 
-        email == null || email.length == 0){
-        res.write('Please fill in all the fields')
-        res.end()
-        return
-    }
-
     const conditions = [
+        {function: async () => {return (username == null || username.length == 0 || 
+            password == null || password.length == 0 || 
+            email == null || email.length == 0)}, expected: false, error: "Please fill in all the fields"},
         {function: async () => usermanagement.isusernamevalid(username), expected: true,
             error: `Username not valid (${config.account.username.min} - ${config.account.username.max})`},
         {function: async () => usermanagement.isusernametaken(username), expected: false,
@@ -87,7 +82,7 @@ app.post('/login', async (req,res) => {
 
     if(username == null || username.length == 0 || 
         password == null || password.length == 0){
-        res.write('2')
+        res.write('Please fill in all the fields')
         res.end()
         return;
     }
@@ -132,6 +127,7 @@ app.post('/login', async (req,res) => {
 
 app.get('/logout', (req, res) => {
     const cookie = req.signedCookies[config.account.cookie.name]
+    res.clearCookie(config.account.cookie.name, {secure: true})
     usermanagement.logout(cookie)
     res.redirect('/')
 })
