@@ -16,7 +16,6 @@ app.set('views', path.join(__dirname,'client'))
 const staticcontent = [
     ["/","index.html"],
     ["/global.css","global.css"],
-    ["/usermanagement","usermanagement.html"],
     ["/usermanagement.js","usermanagement.js"],
     ["/usermanagement.css","usermanagement.css"],
     ["/dashboard.css","dashboard.css"],
@@ -35,6 +34,16 @@ app.get('/dashboard', (req, res) => {
     res.render('dashboard.html', {
         username: loggedInUser.username
     })
+})
+
+app.get('/usermanagement', (req, res) => {
+    if(isLoggedIn(req) != null){
+        //Logged in
+        res.redirect("dashboard")
+    }else {
+        //not logged in
+        res.render("usermanagement.html")
+    }
 })
 
 app.post('/register', async (req, res) => {
@@ -93,6 +102,7 @@ app.post('/login', async (req,res) => {
         //Login with email
         if(!(await usermanagement.isemailtaken(username))){
             res.write('Email is not in use')
+            res.status(400)
             res.end()
             return;
         }
@@ -100,6 +110,7 @@ app.post('/login', async (req,res) => {
         const cookie = await usermanagement.loginwithemail(username, password)
         if(cookie == false){
             res.write('Invalid credentials')
+            res.status(400)
             res.end()
             return;
         }
@@ -107,6 +118,7 @@ app.post('/login', async (req,res) => {
     }else{
         if(!(await usermanagement.isusernametaken(username))){
             res.write('Unknown username')
+            res.status(400)
             res.end()
             return;
         }
@@ -114,6 +126,7 @@ app.post('/login', async (req,res) => {
         const cookie = await usermanagement.loginwithusername(username, password)
         if(cookie == false){
             res.write('Invalid credentials')
+            res.status(400)
             res.end()
             return;
         }
@@ -121,6 +134,8 @@ app.post('/login', async (req,res) => {
     }
 
     res.cookie(config.account.cookie.name, userCookie, {signed: true})
+    res.status(200)
+    res.write("0")
     res.end()
     return;
 })
@@ -132,7 +147,9 @@ app.get('/logout', (req, res) => {
     res.redirect('/')
 })
 
-//Handling of static content
+// ! Handling of static content
+// ! important leave this path last in code, or else your
+// ! paths will be flagged as 404
 app.get('*', (req,res) => {
     for (let i = 0; i < staticcontent.length; i++){
         if(req.path == staticcontent[i][0]){

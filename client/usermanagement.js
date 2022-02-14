@@ -34,11 +34,10 @@ function register(){
             email: Eemail.value
         })
     }).then(async(result) => {
-        result = await result.text()
-        
         if(result.status == 200){
             window.location.replace("/dashboard")
         }else{
+            result = await result.text()
             displayMessage(result)
         }
     }).catch((err) => {
@@ -65,11 +64,10 @@ function login(){
             password: Epassword.value
         })
     }).then(async(result) => {
-        result = await result.text()
-
         if(result.status == 200){
             window.location.replace("/dashboard")
         }else{
+            result = await result.text()
             displayMessage(result)
         }
     }).catch((err) => {
