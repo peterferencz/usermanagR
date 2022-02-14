@@ -144,8 +144,8 @@ app.get('*', (req,res) => {
             return
         }
     }
-    res.write('404')
-    res.end()
+    res.status(404)
+    res.render("404.html")
 })
 
 
