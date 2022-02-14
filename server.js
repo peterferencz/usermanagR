@@ -26,7 +26,7 @@ const staticcontent = [
 
 
 app.get('/dashboard', (req, res) => {
-    const loggedInUser = requierLogin(req)
+    const loggedInUser = isLoggedIn(req)
     if(!loggedInUser){
         res.redirect('/')
         return;
@@ -149,7 +149,7 @@ app.get('*', (req,res) => {
 })
 
 
-function requierLogin(req){
+function isLoggedIn(req){
     const cookie = req.signedCookies[config.account.cookie.name]
     const loggedInUser = usermanagement.getLoggedInUserFromCookie(cookie)
     if(cookie == null || loggedInUser == null){

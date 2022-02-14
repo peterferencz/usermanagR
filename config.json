@@ -1,6 +1,7 @@
 {
     "database":{
-        "connectionString": "mongodb://localhost:27017/lollers"
+        "connectionString": "mongodb://localhost:27017/lollers",
+        "usermodelname": "user"
     },
     "account":{
         "username":{

@@ -15,7 +15,7 @@ const userSchema = new Schema({
 })
 
 
-const usersdb = mongoose.model('user', userSchema)
+const usersdb = mongoose.model(config.database.usermodelname, userSchema)
 
 exports.isusernamevalid = (username) => {
     return (username.length > config.account.username.min-1 && username.length < config.account.username.max+1)
