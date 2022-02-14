@@ -1,7 +1,7 @@
-#
-# Gitignore from:
+certificates/*
+
+# Rest of the Gitignore is from:
 # https://github.com/github/gitignore/blob/main/Node.gitignore
-#
 
 # Logs
 logs

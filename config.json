@@ -18,5 +18,11 @@
             "lengtgh": 8,
             "secret": "<Your-secret>"
         }
+    },
+    "webserver":{
+        "http": {
+            "enabled": true,
+            "port": 8080
+        }
     }
 }

@@ -8,12 +8,15 @@
     "crypto": "^1.0.1",
     "ejs": "^3.1.6",
     "express": "^4.17.2",
+    "http": "0.0.1-security",
+    "https": "^1.0.0",
     "mongoose": "^6.2.0",
     "path": "^0.12.7"
   },
   "devDependencies": {},
   "scripts": {
-    "start": "nodemon server.js --watch ./*.js"
+    "dev": "nodemon server.js --watch ./*.js",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC"

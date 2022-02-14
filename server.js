@@ -1,6 +1,9 @@
 const express = require('express')
 const cookieparser = require('cookie-parser')
+const http = require('http')
+const https = require('https')
 const path = require('path')
+const fs = require('fs')
 const mongoose = require('mongoose')
 const usermanagement = require('./usermanagement')
 const config = require('./config.json')
@@ -175,10 +178,31 @@ function isLoggedIn(req){
     return loggedInUser
 }
 
-app.listen(8080, (err) => {
-    if (err) throw err;
-    console.log("Express server started")
-})
+
+
+
+if(config.webserver.http.enabled){
+    const httpServer = http.createServer(app)
+    httpServer.listen(config.webserver.http.port)
+    console.log("Started http server")
+}
+
+
+// Having some troubles with SSL_ERROR_NO_CYPHER_OVERLAP, so leaving it out
+// if(config.webserver.http.enabled){
+//     const httpsServer = https.createServer(app, {
+//         key: fs.readFileSync(path.join(__dirname,"certificates","localhost.key")),
+//         cert: fs.readFileSync(path.join(__dirname,"certificates","certification.cert"))
+//     })
+//     httpsServer.listen(config.webserver.https.port)
+//     console.log("Started https server")
+// }
+
+
+// app.listen(config.webserver.http.port, (err) => {
+//     if (err) throw err;
+//     console.log("Express server started")
+// })
 
 mongoose.connect(config.database.connectionString, {
     useNewUrlParser: true,
