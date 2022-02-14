@@ -19,15 +19,15 @@ function register(){
     const Eemail = document.querySelector('#email')
 
     fetch('/register', {
-        method: 'POST', // *GET, POST, PUT, DELETE, etc.
-        mode: 'cors', // no-cors, *cors, same-origin
+        method: 'POST',
+        mode: 'same-origin',
         cache: 'no-cache',
-        credentials: 'same-origin', // include, *same-origin, omit
+        credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/json'
         },
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        redirect: 'follow',
+        referrerPolicy: 'no-referrer',
         body: JSON.stringify({
             username: Eusername.value,
             password: Epassword.value,
@@ -51,14 +51,14 @@ function login(){
 
     fetch('/login', {
         method: 'POST',
-        mode: 'cors', // no-cors, *cors, same-origin
+        mode: 'same-origin',
         cache: 'no-cache',
-        credentials: 'same-origin', // include, *same-origin, omit
+        credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/json'
         },
         redirect: 'follow',
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        referrerPolicy: 'no-referrer',
         body: JSON.stringify({
             username: Eusername.value,
             password: Epassword.value
