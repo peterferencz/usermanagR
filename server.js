@@ -5,7 +5,7 @@ const https = require('https')
 const path = require('path')
 const fs = require('fs')
 const mongoose = require('mongoose')
-const usermanagement = require('./usermanagement')
+const auth = require('./auth')
 const config = require('./config.json')
 
 const app = express()
@@ -19,8 +19,8 @@ app.set('views', path.join(__dirname,'client'))
 const staticcontent = [
     ["/","index.html"],
     ["/global.css","global.css"],
-    ["/usermanagement.js","usermanagement.js"],
-    ["/usermanagement.css","usermanagement.css"],
+    ["/auth.js","auth.js"],
+    ["/auth.css","auth.css"],
     ["/dashboard.css","dashboard.css"],
     ["/dashboard.js","dashboard.js"]
 ]
@@ -39,13 +39,13 @@ app.get('/dashboard', (req, res) => {
     })
 })
 
-app.get('/usermanagement', (req, res) => {
+app.get('/auth', (req, res) => {
     if(isLoggedIn(req) != null){
         //Logged in
         res.redirect("dashboard")
     }else {
         //not logged in
-        res.render("usermanagement.html")
+        res.render("auth.html")
     }
 })
 
@@ -58,15 +58,15 @@ app.post('/register', async (req, res) => {
         {function: async () => {return (username == null || username.length == 0 || 
             password == null || password.length == 0 || 
             email == null || email.length == 0)}, expected: false, error: "Please fill in all the fields"},
-        {function: async () => usermanagement.isusernamevalid(username), expected: true,
+        {function: async () => auth.isusernamevalid(username), expected: true,
             error: `Username not valid (${config.account.username.min} - ${config.account.username.max})`},
-        {function: async () => usermanagement.isusernametaken(username), expected: false,
+        {function: async () => auth.isusernametaken(username), expected: false,
             error: "Username already taken"},
-        {function: async () => usermanagement.isemailvalid(email), expected: true,
+        {function: async () => auth.isemailvalid(email), expected: true,
             error: "Email not valid"},
-        {function: async () => usermanagement.isemailtaken(email), expected: false,
+        {function: async () => auth.isemailtaken(email), expected: false,
             error: "Email already in use"},
-        {function: async () => usermanagement.ispasswordvalid(password), expected: true,
+        {function: async () => auth.ispasswordvalid(password), expected: true,
             error: `Password not valid (${config.account.password.min} - ${config.account.password.max})`},
     ]
 
@@ -80,9 +80,9 @@ app.post('/register', async (req, res) => {
         }
     }
 
-    await usermanagement.registerUser(username, password, email)
+    await auth.registerUser(username, password, email)
 
-    const cookie = await usermanagement.loginwithusername(username, password)
+    const cookie = await auth.loginwithusername(username, password)
     res.cookie(config.account.cookie.name, cookie, {signed: true})
     res.status(200)
     res.end()
@@ -101,16 +101,16 @@ app.post('/login', async (req,res) => {
     
 
     let userCookie = null
-    if(usermanagement.isemailvalid(username)){
+    if(auth.isemailvalid(username)){
         //Login with email
-        if(!(await usermanagement.isemailtaken(username))){
+        if(!(await auth.isemailtaken(username))){
             res.write('Email is not in use')
             res.status(400)
             res.end()
             return;
         }
 
-        const cookie = await usermanagement.loginwithemail(username, password)
+        const cookie = await auth.loginwithemail(username, password)
         if(cookie == false){
             res.write('Invalid credentials')
             res.status(400)
@@ -119,14 +119,14 @@ app.post('/login', async (req,res) => {
         }
         userCookie = cookie
     }else{
-        if(!(await usermanagement.isusernametaken(username))){
+        if(!(await auth.isusernametaken(username))){
             res.write('Unknown username')
             res.status(400)
             res.end()
             return;
         }
 
-        const cookie = await usermanagement.loginwithusername(username, password)
+        const cookie = await auth.loginwithusername(username, password)
         if(cookie == false){
             res.write('Invalid credentials')
             res.status(400)
@@ -146,7 +146,7 @@ app.post('/login', async (req,res) => {
 app.get('/logout', (req, res) => {
     const cookie = req.signedCookies[config.account.cookie.name]
     res.clearCookie(config.account.cookie.name, {secure: true})
-    usermanagement.logout(cookie)
+    auth.logout(cookie)
     res.redirect('/')
 })
 
@@ -171,7 +171,7 @@ app.get('*', (req,res) => {
 
 function isLoggedIn(req){
     const cookie = req.signedCookies[config.account.cookie.name]
-    const loggedInUser = usermanagement.getLoggedInUserFromCookie(cookie)
+    const loggedInUser = auth.getLoggedInUserFromCookie(cookie)
     if(cookie == null || loggedInUser == null){
         return null;
     }
@@ -189,6 +189,7 @@ if(config.webserver.http.enabled){
 
 
 // Having some troubles with SSL_ERROR_NO_CYPHER_OVERLAP, so leaving it out
+//
 // if(config.webserver.http.enabled){
 //     const httpsServer = https.createServer(app, {
 //         key: fs.readFileSync(path.join(__dirname,"certificates","localhost.key")),
