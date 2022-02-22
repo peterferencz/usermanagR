@@ -179,31 +179,24 @@ function isLoggedIn(req){
 }
 
 
-
+// Setting up server listeners
 
 if(config.webserver.http.enabled){
     const httpServer = http.createServer(app)
-    httpServer.listen(config.webserver.http.port)
-    console.log("Started http server")
+    httpServer.listen(config.webserver.http.port, () => {
+        console.log("Started http server")
+    })
 }
 
-
-// Having some troubles with SSL_ERROR_NO_CYPHER_OVERLAP, so leaving it out
-//
-// if(config.webserver.http.enabled){
-//     const httpsServer = https.createServer(app, {
-//         key: fs.readFileSync(path.join(__dirname,"certificates","localhost.key")),
-//         cert: fs.readFileSync(path.join(__dirname,"certificates","certification.cert"))
-//     })
-//     httpsServer.listen(config.webserver.https.port)
-//     console.log("Started https server")
-// }
-
-
-// app.listen(config.webserver.http.port, (err) => {
-//     if (err) throw err;
-//     console.log("Express server started")
-// })
+if(config.webserver.https.enabled){
+    const httpsServer = https.createServer({
+        key: fs.readFileSync(path.join(__dirname,"certificates","server.key")),
+        cert: fs.readFileSync(path.join(__dirname,"certificates","server.cert"))
+    }, app)
+    httpsServer.listen(config.webserver.https.port, () => {
+        console.log("Started https server")
+    })
+}
 
 mongoose.connect(config.database.connectionString, {
     useNewUrlParser: true,

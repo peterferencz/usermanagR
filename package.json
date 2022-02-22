@@ -18,6 +18,6 @@
     "dev": "nodemon server.js --watch ./*.js",
     "start": "node server.js"
   },
-  "author": "",
+  "author": "Chicken112",
   "license": "ISC"
 }
