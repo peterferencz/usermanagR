@@ -187,7 +187,9 @@ if(config.webserver.http.enabled){
         console.log("Started http server")
     })
 }
-
+// HTTPS currently not working in firefox,
+// but fine in chrome. Shouldn't be an issue
+// with a proper CA, but sucks for local dev.
 if(config.webserver.https.enabled){
     const httpsServer = https.createServer({
         key: fs.readFileSync(path.join(__dirname,"certificates","server.key")),
