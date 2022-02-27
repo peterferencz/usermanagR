@@ -95,6 +95,7 @@ app.post('/login', async (req,res) => {
     if(username == null || username.length == 0 || 
         password == null || password.length == 0){
         res.write('Please fill in all the fields')
+        res.status(400)
         res.end()
         return;
     }
