@@ -41,7 +41,7 @@ app.get('/auth', (req, res) => {
     if(req.isLoggedin){
         res.redirect("dashboard")
     }else {
-        res.render("auth.html")
+        res.render("auth/auth.html")
     }
 })
 
@@ -129,7 +129,7 @@ app.post('/login', async (req,res) => {
 app.get('/logout', (req, res) => {
     const cookie = req.signedCookies[config.account.cookie.name]
     auth.logout(cookie)
-    logger.log(`User '${auth.getLoggedInUserFromCookie(userCookie).username}' logged out`, "auth/logout")
+    logger.log(`User '${auth.getLoggedInUserFromCookie(cookie).username}' logged out`, "auth/logout")
     res.clearCookie(config.account.cookie.name, {secure: true})
     .redirect('/')
 })
@@ -139,7 +139,7 @@ app.get('/logout', (req, res) => {
 //#region sites
 app.get('/dashboard', (req, res) => {
     if(req.isLoggedin){
-        res.render('dashboard.html', {
+        res.render('dashboard/dashboard.html', {
             username: req.loggedInUser.username
         })
     }else{
@@ -153,11 +153,11 @@ app.get('/dashboard', (req, res) => {
 app.get('*', (req,res) => {
     const staticcontent = [
         ["/","index.html"],
-        ["/global.css","global.css"],
-        ["/auth.js","auth.js"],
-        ["/auth.css","auth.css"],
-        ["/dashboard.css","dashboard.css"],
-        ["/dashboard.js","dashboard.js"]
+        ["/global.css","global/global.css"],
+        ["/auth.js","auth/auth.js"],
+        ["/auth.css","auth/auth.css"],
+        ["/dashboard.css","dashboard/dashboard.css"],
+        ["/dashboard.js","dashboard/dashboard.js"]
     ]
     for (let i = 0; i < staticcontent.length; i++){
         if(req.path == staticcontent[i][0]){
@@ -170,7 +170,7 @@ app.get('*', (req,res) => {
         }
     }
     res.status(404)
-    .render("404.html")
+    .render("404/404.html")
 })
 //#endregion
 
