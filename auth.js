@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const enctypt = require('crypto')
 const config = require('./config.json')
+const logger = require('./logger')
 
 const loggedInUsers = []
 

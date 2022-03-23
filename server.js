@@ -8,6 +8,7 @@ const fs = require('fs')
 const mongoose = require('mongoose')
 const auth = require('./auth')
 const config = require('./config.json')
+const logger = require('./logger')
 
 const app = express()
 app.use(cookieparser(config.account.cookie.secret))
@@ -23,6 +24,15 @@ app.use((req, res, next) => {
     
     req.isLoggedin = (cookie == null || loggedInUser == null) ? false : true
     req.loggedInUser = loggedInUser
+    next()
+})
+
+app.use((req, res, next) => {
+    if(req.isLoggedin){
+        logger.log(`${req.loggedInUser.username} requested ${req.protocol}://${req.get('host')}${req.originalUrl}`, "server/request")
+    }else{
+        logger.log(`${req.ip} requested ${req.protocol}://${req.get('host')}${req.originalUrl}`, "server/request")
+    }
     next()
 })
 
@@ -65,6 +75,7 @@ app.post('/register', async (req, res) => {
     await auth.registerUser(username, password, email)
 
     const cookie = await auth.loginwithusername(username, password)
+    logger.log(`${req.loggedInUser.username} registered from ${req.ip}`, "auth/register")
     res.cookie(config.account.cookie.name, cookie, {signed: true, sameSite: "strict"})
     .status(200).send("OK")
 })
@@ -93,6 +104,7 @@ app.post('/login', async (req,res) => {
             return;
         }
         userCookie = cookie
+        method = "EMAIL"
     }else{
         if(!(await auth.isusernametaken(username))){
             res.status(400).send('Unknown username')
@@ -107,6 +119,8 @@ app.post('/login', async (req,res) => {
         userCookie = cookie
     }
 
+    logger.log(`User '${auth.getLoggedInUserFromCookie(userCookie).username}' logged in from ${req.ip}`, "auth/login")
+
     res.cookie(config.account.cookie.name, userCookie, {signed: true, sameSite: "strict"})
     .status(200).send("OK")
     return;
@@ -115,6 +129,7 @@ app.post('/login', async (req,res) => {
 app.get('/logout', (req, res) => {
     const cookie = req.signedCookies[config.account.cookie.name]
     auth.logout(cookie)
+    logger.log(`User '${auth.getLoggedInUserFromCookie(userCookie).username}' logged out`, "auth/logout")
     res.clearCookie(config.account.cookie.name, {secure: true})
     .redirect('/')
 })
@@ -163,8 +178,13 @@ app.get('*', (req,res) => {
 //#region starting servers
 if(config.webserver.http.enabled){
     const httpServer = http.createServer(app)
-    httpServer.listen(config.webserver.http.port, () => {
-        console.log("Started http server")
+    httpServer.listen(config.webserver.http.port, (err) => {
+        if(err){
+            logger.log("Got error while starting server", "server/http")
+            logger.log(err, "error")
+        }else{
+            logger.log("Started http server", "server/http")
+        }
     })
 }
 // HTTPS currently not working in firefox,
@@ -175,16 +195,22 @@ if(config.webserver.https.enabled){
         key: fs.readFileSync(path.join(__dirname,"certificates","server.key")),
         cert: fs.readFileSync(path.join(__dirname,"certificates","server.cert"))
     }, app)
-    httpsServer.listen(config.webserver.https.port, () => {
-        console.log("Started https server")
+    httpsServer.listen(config.webserver.https.port, (err) => {
+        if(err){
+            logger.log("Got error while starting server", "server/https")
+            logger.log(err, "error")
+        }else{
+            logger.log("Started https server", "server/https")
+        }
     })
 }
 
 mongoose.connect(config.database.connectionString, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}, (err) => {
-    if(err) throw err;
-    console.log("Connected to mongodb!")
+    serverSelectionTimeoutMS: 2000,
+})
+.then(()=> logger.log("Connected to mongodb", "server/mongodb"))
+.catch((error)=> {
+    logger.log("Got error while connecting to mongodb", "server/mongodb")
+    logger.log(error, "error")
 })
 //#endregion
