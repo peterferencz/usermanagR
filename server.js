@@ -1,3 +1,4 @@
+//#region imports
 const express = require('express')
 const cookieparser = require('cookie-parser')
 const http = require('http')
@@ -14,16 +15,7 @@ app.use(express.json())
 app.set('view-engine', 'ejs')
 app.engine('html', require('ejs').renderFile)
 app.set('views', path.join(__dirname,'client'))
-//app.engine('css', require('ejs').renderFile)
-
-const staticcontent = [
-    ["/","index.html"],
-    ["/global.css","global.css"],
-    ["/auth.js","auth.js"],
-    ["/auth.css","auth.css"],
-    ["/dashboard.css","dashboard.css"],
-    ["/dashboard.js","dashboard.js"]
-]
+//#endregion
 
 app.use((req, res, next) => {
     const cookie = req.signedCookies[config.account.cookie.name]
@@ -34,19 +26,7 @@ app.use((req, res, next) => {
     next()
 })
 
-app.get('/dashboard', (req, res) => {
-    if(req.isLoggedin){
-        res.render('dashboard.html', {
-            username: req.loggedInUser.username
-        })
-    }else{
-        res.redirect('/')
-        return;
-        
-    }
-
-})
-
+//#region authentication
 app.get('/auth', (req, res) => {
     if(req.isLoggedin){
         res.redirect("dashboard")
@@ -138,11 +118,32 @@ app.get('/logout', (req, res) => {
     res.clearCookie(config.account.cookie.name, {secure: true})
     .redirect('/')
 })
+//#endregion
 
-// ! Handling of static content
-// ! important leave this path last in code, or else your
-// ! paths will be flagged as 404
+
+//#region sites
+app.get('/dashboard', (req, res) => {
+    if(req.isLoggedin){
+        res.render('dashboard.html', {
+            username: req.loggedInUser.username
+        })
+    }else{
+        res.redirect('/')
+        return;
+        
+    }
+
+})
+
 app.get('*', (req,res) => {
+    const staticcontent = [
+        ["/","index.html"],
+        ["/global.css","global.css"],
+        ["/auth.js","auth.js"],
+        ["/auth.css","auth.css"],
+        ["/dashboard.css","dashboard.css"],
+        ["/dashboard.js","dashboard.js"]
+    ]
     for (let i = 0; i < staticcontent.length; i++){
         if(req.path == staticcontent[i][0]){
             if(staticcontent[i][1].slice(staticcontent[i][1].lastIndexOf('.') + 1) == 'html'){
@@ -156,20 +157,10 @@ app.get('*', (req,res) => {
     res.status(404)
     .render("404.html")
 })
+//#endregion
 
 
-// function isLoggedIn(req){
-//     const cookie = req.signedCookies[config.account.cookie.name]
-//     const loggedInUser = auth.getLoggedInUserFromCookie(cookie)
-//     if(cookie == null || loggedInUser == null){
-//         return null;
-//     }
-//     return loggedInUser
-// }
-
-
-// Setting up server listeners
-
+//#region starting servers
 if(config.webserver.http.enabled){
     const httpServer = http.createServer(app)
     httpServer.listen(config.webserver.http.port, () => {
@@ -196,3 +187,4 @@ mongoose.connect(config.database.connectionString, {
     if(err) throw err;
     console.log("Connected to mongodb!")
 })
+//#endregion
