@@ -25,24 +25,32 @@ const staticcontent = [
     ["/dashboard.js","dashboard.js"]
 ]
 
+app.use((req, res, next) => {
+    const cookie = req.signedCookies[config.account.cookie.name]
+    const loggedInUser = auth.getLoggedInUserFromCookie(cookie)
+    
+    req.isLoggedin = (cookie == null || loggedInUser == null) ? false : true
+    req.loggedInUser = loggedInUser
+    next()
+})
+
 app.get('/dashboard', (req, res) => {
-    const loggedInUser = isLoggedIn(req)
-    if(!loggedInUser){
+    if(req.isLoggedin){
+        res.render('dashboard.html', {
+            username: req.loggedInUser.username
+        })
+    }else{
         res.redirect('/')
         return;
+        
     }
 
-    res.render('dashboard.html', {
-        username: loggedInUser.username
-    })
 })
 
 app.get('/auth', (req, res) => {
-    if(isLoggedIn(req) != null){
-        //Logged in
+    if(req.isLoggedin){
         res.redirect("dashboard")
     }else {
-        //not logged in
         res.render("auth.html")
     }
 })
@@ -150,14 +158,14 @@ app.get('*', (req,res) => {
 })
 
 
-function isLoggedIn(req){
-    const cookie = req.signedCookies[config.account.cookie.name]
-    const loggedInUser = auth.getLoggedInUserFromCookie(cookie)
-    if(cookie == null || loggedInUser == null){
-        return null;
-    }
-    return loggedInUser
-}
+// function isLoggedIn(req){
+//     const cookie = req.signedCookies[config.account.cookie.name]
+//     const loggedInUser = auth.getLoggedInUserFromCookie(cookie)
+//     if(cookie == null || loggedInUser == null){
+//         return null;
+//     }
+//     return loggedInUser
+// }
 
 
 // Setting up server listeners
