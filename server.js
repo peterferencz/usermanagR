@@ -85,7 +85,7 @@ app.post('/register', async (req, res) => {
     await auth.registerUser(username, password, email)
 
     const cookie = await auth.loginwithusername(username, password)
-    res.cookie(config.account.cookie.name, cookie, {signed: true})
+    res.cookie(config.account.cookie.name, cookie, {signed: true, sameSite: "strict"})
     .status(200).send("OK")
 })
 
@@ -127,7 +127,7 @@ app.post('/login', async (req,res) => {
         userCookie = cookie
     }
 
-    res.cookie(config.account.cookie.name, userCookie, {signed: true})
+    res.cookie(config.account.cookie.name, userCookie, {signed: true, sameSite: "strict"})
     .status(200).send("OK")
     return;
 })
