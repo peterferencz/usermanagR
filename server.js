@@ -25,8 +25,6 @@ const staticcontent = [
     ["/dashboard.js","dashboard.js"]
 ]
 
-
-
 app.get('/dashboard', (req, res) => {
     const loggedInUser = isLoggedIn(req)
     if(!loggedInUser){
@@ -50,9 +48,7 @@ app.get('/auth', (req, res) => {
 })
 
 app.post('/register', async (req, res) => {
-    const username = req.body.username
-    const password = req.body.password
-    const email = req.body.email
+    const {username, password, email} = req.body
 
     const conditions = [
         {function: async () => {return (username == null || username.length == 0 || 
@@ -73,9 +69,7 @@ app.post('/register', async (req, res) => {
     for (let i = 0; i < conditions.length; i++) {
         const condition = conditions[i];
         if(await condition.function() != condition.expected){
-            res.status(400)
-            res.write(condition.error)
-            res.end()
+            res.status(400).send(condition.error)
             return
         }
     }
@@ -84,18 +78,15 @@ app.post('/register', async (req, res) => {
 
     const cookie = await auth.loginwithusername(username, password)
     res.cookie(config.account.cookie.name, cookie, {signed: true})
-    res.status(200)
-    res.end()
+    .status(200).send("OK")
 })
 
 app.post('/login', async (req,res) => {
-    const username = req.body.username
-    const password = req.body.password
+    const {username, password} = req.body
 
     if(username == null || username.length == 0 || 
         password == null || password.length == 0){
-        res.write('Please fill in all the fields')
-        res.end()
+        res.status(400).send('Please fill in all the fields')
         return;
     }
     
@@ -104,50 +95,40 @@ app.post('/login', async (req,res) => {
     if(auth.isemailvalid(username)){
         //Login with email
         if(!(await auth.isemailtaken(username))){
-            res.write('Email is not in use')
-            res.status(400)
-            res.end()
+            res.status(400).send('Email is not in use')
             return;
         }
 
         const cookie = await auth.loginwithemail(username, password)
         if(cookie == false){
-            res.write('Invalid credentials')
-            res.status(400)
-            res.end()
+            res.status(400).send('Invalid credentials')
             return;
         }
         userCookie = cookie
     }else{
         if(!(await auth.isusernametaken(username))){
-            res.write('Unknown username')
-            res.status(400)
-            res.end()
+            res.status(400).send('Unknown username')
             return;
         }
 
         const cookie = await auth.loginwithusername(username, password)
         if(cookie == false){
-            res.write('Invalid credentials')
-            res.status(400)
-            res.end()
+            res.status(400).send('Invalid credentials')
             return;
         }
         userCookie = cookie
     }
 
     res.cookie(config.account.cookie.name, userCookie, {signed: true})
-    res.status(200)
-    res.write("0")
-    res.end()
+    .status(200).send("OK")
     return;
 })
 
 app.get('/logout', (req, res) => {
     const cookie = req.signedCookies[config.account.cookie.name]
-    res.clearCookie(config.account.cookie.name, {secure: true})
     auth.logout(cookie)
-    res.redirect('/')
+    res.clearCookie(config.account.cookie.name, {secure: true})
+    .redirect('/')
 })
 
 // ! Handling of static content
@@ -165,7 +146,7 @@ app.get('*', (req,res) => {
         }
     }
     res.status(404)
-    res.render("404.html")
+    .render("404.html")
 })
 
 
