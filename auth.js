@@ -63,7 +63,7 @@ exports.loginwithemail = async (email, password) => {
         if(hash(password, usr.salt) == usr.passwordHash){
             let cookie = randomHex(config.account.cookie.lengtgh)
             
-            while(getLoggedInUserFromCookie(cookie) != null){
+            while(this.getLoggedInUserFromCookie(cookie) != null){
                 cookie = randomHex(config.account.cookie.lengtgh)
             }
 
@@ -88,7 +88,7 @@ exports.loginwithusername = async (username, password) => {
         if(hash(password, usr.passwordSalt) == usr.passwordHash){
             let cookie = randomHex(config.account.cookie.lengtgh)
             
-            while(getLoggedInUserFromCookie(cookie) != null){
+            while(this.getLoggedInUserFromCookie(cookie) != null){
                 cookie = randomHex(config.account.cookie.lengtgh)
             }
 
@@ -105,8 +105,6 @@ exports.loginwithusername = async (username, password) => {
 }
 
 exports.registerUser = async (username, password, email) => {
-    console.log(username, password, email)
-
     const salt = randomHex(config.account.password.saltLength)
     const newUser = new usersdb({
         username: username,
@@ -118,8 +116,12 @@ exports.registerUser = async (username, password, email) => {
     await newUser.save()
 }
 
+exports.getUserFromId = async (id) => {
+    return await usersdb.findById(id)
+}
 
-function getLoggedInUserFromCookie(cookie) {
+
+exports.getLoggedInUserFromCookie = (cookie) => {
     for(let i = 0; i < loggedInUsers.length; i++){
         if(loggedInUsers[i].cookie == cookie){
             return loggedInUsers[i]
@@ -127,7 +129,6 @@ function getLoggedInUserFromCookie(cookie) {
     }
     return null;
 }
-exports.getLoggedInUserFromCookie = getLoggedInUserFromCookie
 exports.getLoggedInUserFromId = (id) =>{
     for(let i = 0; i < loggedInUsers.length; i++){
         if(loggedInUsers[i].id == id){

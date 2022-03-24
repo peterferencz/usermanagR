@@ -24,6 +24,11 @@ app.use((req, res, next) => {
     
     req.isLoggedin = (cookie == null || loggedInUser == null) ? false : true
     req.loggedInUser = loggedInUser
+    if(req.isLoggedin){
+        req.databaseObject = async () => {
+            return await auth.getUserFromId(loggedInUser.id)
+        }
+    }
     next()
 })
 
@@ -128,8 +133,8 @@ app.post('/login', async (req,res) => {
 
 app.get('/logout', (req, res) => {
     const cookie = req.signedCookies[config.account.cookie.name]
-    auth.logout(cookie)
     logger.log(`User '${auth.getLoggedInUserFromCookie(cookie).username}' logged out`, "auth/logout")
+    auth.logout(cookie)
     res.clearCookie(config.account.cookie.name, {secure: true})
     .redirect('/')
 })
