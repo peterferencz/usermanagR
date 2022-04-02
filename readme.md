@@ -1,4 +1,4 @@
-# usermanagement
+# usermanagR
 
 this is my boilerplate when it comes to a new web app using vanilla js
 
